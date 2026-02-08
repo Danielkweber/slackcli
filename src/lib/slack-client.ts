@@ -96,6 +96,21 @@ export class SlackClient {
     return this.request('conversations.list', options);
   }
 
+  // Mark conversation as read
+  async markConversationRead(channel: string, ts: string): Promise<any> {
+    return this.request('conversations.mark', { channel, ts });
+  }
+
+  // Get unread counts (uses internal Slack API, works with browser auth)
+  async getClientCounts(): Promise<any> {
+    return this.request('client.counts', {});
+  }
+
+  // Get conversation info
+  async getConversationInfo(channel: string): Promise<any> {
+    return this.request('conversations.info', { channel });
+  }
+
   // Get conversation history
   async getConversationHistory(channel: string, options: {
     cursor?: string;

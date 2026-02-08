@@ -85,6 +85,41 @@ export function formatChannelList(channels: SlackChannel[], users: Map<string, S
   return output;
 }
 
+// Format channel list with unread counts
+export function formatChannelListWithUnreads(
+  channels: SlackChannel[],
+  users: Map<string, SlackUser>,
+  mentionCounts?: Map<string, number>,
+): string {
+  if (channels.length === 0) {
+    return chalk.dim('No unread conversations.');
+  }
+
+  let output = chalk.bold(`📬 Unread Conversations (${channels.length})\n\n`);
+
+  channels.forEach((ch, idx) => {
+    const mentions = mentionCounts?.get(ch.id) ?? 0;
+    const badge = mentions > 0 ? chalk.red(`(${mentions} mentions)`) : chalk.yellow('(unread)');
+    let name: string;
+
+    if (ch.is_im) {
+      const user = ch.user ? users.get(ch.user) : null;
+      const userName = user?.real_name || user?.name || 'Unknown User';
+      name = `@${userName}`;
+    } else if (ch.is_mpim) {
+      name = ch.name || 'Group';
+    } else if (ch.is_private) {
+      name = `🔒 ${ch.name}`;
+    } else {
+      name = `#${ch.name}`;
+    }
+
+    output += `  ${idx + 1}. ${name} ${badge} ${chalk.dim(`(${ch.id})`)}\n`;
+  });
+
+  return output;
+}
+
 // Format message with reactions
 export function formatMessage(
   msg: SlackMessage,
