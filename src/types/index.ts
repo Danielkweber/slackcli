@@ -161,6 +161,34 @@ export interface SlackSearchResponse {
   files: { matches: SlackSearchFileMatch[]; paging: SlackSearchPaging };
 }
 
+// Thread view types (subscriptions.thread.getView internal API)
+export interface SlackThreadEntry {
+  root_msg: {
+    text: string;
+    user: string;
+    ts: string;
+    thread_ts: string;
+    channel: string;
+    reply_count?: number;
+    reply_users?: string[];
+    latest_reply?: string;
+    last_read?: string;
+    subscribed?: boolean;
+    reactions?: Array<{ name: string; count: number; users: string[] }>;
+  };
+  unread_replies?: SlackMessage[];
+  latest_replies?: SlackMessage[];
+}
+
+export interface SlackThreadView {
+  ok: boolean;
+  total_unread_replies: number;
+  new_threads_count: number;
+  has_more: boolean;
+  max_ts: string;
+  threads: SlackThreadEntry[];
+}
+
 // File upload types
 export interface FileUploadUrlResponse {
   ok: boolean;

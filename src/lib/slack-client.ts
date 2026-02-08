@@ -106,6 +106,16 @@ export class SlackClient {
     return this.request('client.counts', {});
   }
 
+  // Get subscribed threads view (uses internal Slack API, works with browser auth)
+  async getThreadsView(options: { limit?: number; max_ts?: string } = {}): Promise<any> {
+    const params: Record<string, any> = {
+      current_ts: String(Date.now() / 1000),
+    };
+    if (options.limit) params.limit = String(options.limit);
+    if (options.max_ts) params.max_ts = options.max_ts;
+    return this.request('subscriptions.thread.getView', params);
+  }
+
   // Get conversation info
   async getConversationInfo(channel: string): Promise<any> {
     return this.request('conversations.info', { channel });

@@ -1,5 +1,5 @@
 import chalk from 'chalk';
-import type { SlackChannel, SlackMessage, SlackUser, SlackSearchResponse, WorkspaceConfig } from '../types/index.ts';
+import type { SlackChannel, SlackMessage, SlackUser, SlackSearchResponse, SlackThreadEntry, WorkspaceConfig } from '../types/index.ts';
 
 // Format timestamp to human-readable date
 export function formatTimestamp(ts: string): string {
@@ -228,6 +228,46 @@ export function formatSearchResults(response: SlackSearchResponse): string {
   if (paging && paging.pages > 1) {
     output += chalk.dim(`\n  Page ${paging.page} of ${paging.pages}`);
   }
+
+  return output;
+}
+
+// Format unread threads
+export function formatUnreadThreads(
+  threads: SlackThreadEntry[],
+  channelNames: Map<string, string>,
+  users: Map<string, SlackUser>,
+): string {
+  if (threads.length === 0) {
+    return chalk.dim('No unread threads.');
+  }
+
+  const totalUnread = threads.reduce(
+    (sum, t) => sum + (t.unread_replies?.length ?? 0),
+    0,
+  );
+
+  let output = chalk.bold(`🧵 Unread Threads (${threads.length})`) + '\n\n';
+
+  threads.forEach((thread, idx) => {
+    const channelName = channelNames.get(thread.root_msg.channel) || thread.root_msg.channel;
+    const rootText = thread.root_msg.text?.replace(/\n/g, ' ').slice(0, 80) || '';
+    const unreadCount = thread.unread_replies?.length ?? 0;
+
+    output += `  ${idx + 1}. #${channelName} — "${rootText}${thread.root_msg.text && thread.root_msg.text.length > 80 ? '...' : ''}" (${unreadCount} unread)\n`;
+
+    // Show each unread reply
+    if (thread.unread_replies) {
+      for (const reply of thread.unread_replies) {
+        const user = reply.user ? users.get(reply.user) : null;
+        const userName = user?.real_name || user?.name || reply.user || 'Unknown';
+        const replyText = reply.text?.replace(/\n/g, ' ').slice(0, 120) || '';
+        output += `     @${userName}: ${replyText}${reply.text && reply.text.length > 120 ? '...' : ''}\n`;
+      }
+    }
+
+    if (idx < threads.length - 1) output += '\n';
+  });
 
   return output;
 }

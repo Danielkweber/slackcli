@@ -340,6 +340,76 @@ describe('SlackClient upload methods', () => {
   });
 });
 
+describe('SlackClient getThreadsView', () => {
+  it('should call subscriptions.thread.getView with current_ts', async () => {
+    const { client, requestMock } = createMockClient();
+    requestMock.mockResolvedValueOnce({ ok: true, threads: [] });
+
+    await client.getThreadsView();
+
+    expect(requestMock).toHaveBeenCalledTimes(1);
+    const call = (requestMock.mock.calls as any[][])[0];
+    expect(call[0]).toBe('subscriptions.thread.getView');
+    expect(call[1]).toHaveProperty('current_ts');
+    expect(parseFloat(call[1].current_ts)).toBeGreaterThan(0);
+  });
+
+  it('should pass limit as string when provided', async () => {
+    const { client, requestMock } = createMockClient();
+    requestMock.mockResolvedValueOnce({ ok: true, threads: [] });
+
+    await client.getThreadsView({ limit: 10 });
+
+    const params = (requestMock.mock.calls as any[][])[0][1];
+    expect(params.limit).toBe('10');
+  });
+
+  it('should pass max_ts for pagination when provided', async () => {
+    const { client, requestMock } = createMockClient();
+    requestMock.mockResolvedValueOnce({ ok: true, threads: [] });
+
+    await client.getThreadsView({ max_ts: '1770571013.000259' });
+
+    const params = (requestMock.mock.calls as any[][])[0][1];
+    expect(params.max_ts).toBe('1770571013.000259');
+  });
+
+  it('should omit optional params when not provided', async () => {
+    const { client, requestMock } = createMockClient();
+    requestMock.mockResolvedValueOnce({ ok: true, threads: [] });
+
+    await client.getThreadsView();
+
+    const params = (requestMock.mock.calls as any[][])[0][1];
+    expect(params).not.toHaveProperty('limit');
+    expect(params).not.toHaveProperty('max_ts');
+  });
+
+  it('should return the API response', async () => {
+    const { client, requestMock } = createMockClient();
+    const mockResponse = {
+      ok: true,
+      total_unread_replies: 2,
+      new_threads_count: 1,
+      has_more: false,
+      threads: [{ root_msg: { text: 'hello', user: 'U123', ts: '1234.5678', thread_ts: '1234.5678', channel: 'C123' } }],
+    };
+    requestMock.mockResolvedValueOnce(mockResponse);
+
+    const result = await client.getThreadsView({ limit: 5 });
+
+    expect(result.total_unread_replies).toBe(2);
+    expect(result.threads).toHaveLength(1);
+  });
+
+  it('should propagate errors', async () => {
+    const { client, requestMock } = createMockClient();
+    requestMock.mockRejectedValueOnce(new Error('not_authed'));
+
+    await expect(client.getThreadsView()).rejects.toThrow('not_authed');
+  });
+});
+
 describe('SlackClient search methods', () => {
   describe('searchAll', () => {
     it('should call search.all with query', async () => {

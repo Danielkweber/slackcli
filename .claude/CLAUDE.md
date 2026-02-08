@@ -66,3 +66,4 @@ function createMockClient() {
 | Search | #14 | `search.all` |
 | List unreads | #15 | `client.counts` (internal) + `conversations.info` |
 | Mark read | #15 | `conversations.mark` |
+| List unread threads | — | `subscriptions.thread.getView` (internal) + `conversations.info` |

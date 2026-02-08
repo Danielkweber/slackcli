@@ -1,8 +1,8 @@
 import { Command } from 'commander';
 import ora from 'ora';
 import { getAuthenticatedClient } from '../lib/auth.ts';
-import { error, formatChannelList, formatChannelListWithUnreads, formatConversationHistory } from '../lib/formatter.ts';
-import type { SlackChannel, SlackMessage, SlackUser } from '../types/index.ts';
+import { error, formatChannelList, formatChannelListWithUnreads, formatConversationHistory, formatUnreadThreads } from '../lib/formatter.ts';
+import type { SlackChannel, SlackMessage, SlackThreadEntry, SlackUser } from '../types/index.ts';
 
 export function createConversationsCommand(): Command {
   const conversations = new Command('conversations')
@@ -246,6 +246,101 @@ export function createConversationsCommand(): Command {
         }
       } catch (err: any) {
         spinner.fail('Failed to fetch conversations');
+        error(err.message, 'Run "slackcli auth list" to check your authentication.');
+        process.exit(1);
+      }
+    });
+
+  // List unread threads
+  conversations
+    .command('list-unread-threads')
+    .description('List threads with unread replies')
+    .option('--limit <number>', 'Number of threads to fetch', '20')
+    .option('--all', 'Show all subscribed threads, not just unread', false)
+    .option('--workspace <id|name>', 'Workspace to use (overrides default)')
+    .option('--json', 'Output in JSON format', false)
+    .action(async (options) => {
+      const spinner = ora('Fetching thread subscriptions...').start();
+
+      try {
+        const client = await getAuthenticatedClient(options.workspace);
+
+        const response = await client.getThreadsView({ limit: parseInt(options.limit) });
+        let threads: SlackThreadEntry[] = response.threads || [];
+
+        // Filter to only unread threads unless --all
+        if (!options.all) {
+          threads = threads.filter((t: SlackThreadEntry) => t.unread_replies && t.unread_replies.length > 0);
+        }
+
+        // Resolve channel names in parallel
+        spinner.text = `Resolving ${threads.length} thread channels...`;
+        const channelIds = new Set(threads.map((t: SlackThreadEntry) => t.root_msg.channel));
+        const channelNames = new Map<string, string>();
+
+        await Promise.all(
+          Array.from(channelIds).map(async (id) => {
+            try {
+              const info = await client.getConversationInfo(id);
+              if (info.channel?.name) channelNames.set(id, info.channel.name);
+            } catch {
+              // Skip channels we can't resolve
+            }
+          })
+        );
+
+        // Resolve user names
+        spinner.text = 'Fetching user information...';
+        const userIds = new Set<string>();
+        for (const thread of threads) {
+          if (thread.root_msg.user) userIds.add(thread.root_msg.user);
+          for (const reply of thread.unread_replies || []) {
+            if (reply.user) userIds.add(reply.user);
+          }
+          for (const reply of thread.latest_replies || []) {
+            if (reply.user) userIds.add(reply.user);
+          }
+        }
+
+        const users = new Map<string, SlackUser>();
+        if (userIds.size > 0) {
+          const usersResponse = await client.getUsersInfo(Array.from(userIds));
+          usersResponse.users?.forEach((user: SlackUser) => {
+            users.set(user.id, user);
+          });
+        }
+
+        const unreadCount = threads.filter((t: SlackThreadEntry) => t.unread_replies && t.unread_replies.length > 0).length;
+        spinner.succeed(`Found ${unreadCount} threads with unread replies`);
+
+        if (options.json) {
+          console.log(JSON.stringify({
+            unread_thread_count: unreadCount,
+            total_unread_replies: response.total_unread_replies ?? 0,
+            threads: threads.map((t: SlackThreadEntry) => ({
+              channel_id: t.root_msg.channel,
+              channel_name: channelNames.get(t.root_msg.channel) || t.root_msg.channel,
+              root_msg: {
+                text: t.root_msg.text,
+                user: t.root_msg.user,
+                user_name: users.get(t.root_msg.user)?.real_name || users.get(t.root_msg.user)?.name,
+                ts: t.root_msg.ts,
+                thread_ts: t.root_msg.thread_ts,
+                reply_count: t.root_msg.reply_count,
+              },
+              unread_replies: (t.unread_replies || []).map((r) => ({
+                user: r.user,
+                user_name: users.get(r.user || '')?.real_name || users.get(r.user || '')?.name,
+                text: r.text,
+                ts: r.ts,
+              })),
+            })),
+          }, null, 2));
+        } else {
+          console.log('\n' + formatUnreadThreads(threads, channelNames, users));
+        }
+      } catch (err: any) {
+        spinner.fail('Failed to fetch threads');
         error(err.message, 'Run "slackcli auth list" to check your authentication.');
         process.exit(1);
       }
