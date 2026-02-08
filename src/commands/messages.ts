@@ -36,9 +36,10 @@ export function createMessagesCommand(): Command {
 
         spinner.succeed('Message sent successfully!');
         success(`Message timestamp: ${response.ts}`);
-      } catch (err: any) {
+      } catch (err) {
         spinner.fail('Failed to send message');
-        error(err.message);
+        const message = err instanceof Error ? err.message : String(err);
+        error(message);
         process.exit(1);
       }
     });
@@ -61,9 +62,10 @@ export function createMessagesCommand(): Command {
 
         spinner.succeed('Reaction added successfully!');
         success(`Added :${options.emoji}: to message ${options.timestamp}`);
-      } catch (err: any) {
+      } catch (err) {
         spinner.fail('Failed to add reaction');
-        error(err.message);
+        const message = err instanceof Error ? err.message : String(err);
+        error(message);
         process.exit(1);
       }
     });

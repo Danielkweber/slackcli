@@ -50,11 +50,12 @@ export function createFilesCommand(): Command {
         const count = filePaths.length;
         spinner.succeed(`${count} file${count > 1 ? 's' : ''} uploaded successfully!`);
         if (response.files) {
-          response.files.forEach((f: any) => success(`File ID: ${f.id}`));
+          response.files.forEach((f) => success(`File ID: ${f.id}`));
         }
-      } catch (err: any) {
+      } catch (err) {
         spinner.fail('Failed to upload file');
-        error(err.message);
+        const message = err instanceof Error ? err.message : String(err);
+        error(message);
         process.exit(1);
       }
     });

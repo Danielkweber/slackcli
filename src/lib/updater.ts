@@ -156,10 +156,11 @@ export async function performUpdate(): Promise<void> {
 
     success(`Updated to version ${latestVersion}`);
     info('Please restart slackcli to use the new version');
-  } catch (error: any) {
+  } catch (err) {
     // Try to restore from backup if it exists
-    logError(`Update failed: ${error.message}`);
-    throw error;
+    const message = err instanceof Error ? err.message : String(err);
+    logError(`Update failed: ${message}`);
+    throw err;
   }
 }
 

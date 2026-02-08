@@ -8,8 +8,9 @@ export function createUpdateCommand(): Command {
     .action(async () => {
       try {
         await performUpdate();
-      } catch (err: any) {
-        error('Update failed', err.message);
+      } catch (err) {
+        const message = err instanceof Error ? err.message : String(err);
+        error('Update failed', message);
         process.exit(1);
       }
     });
@@ -30,8 +31,9 @@ export function createUpdateCommand(): Command {
         } else {
           success('You are on the latest version!');
         }
-      } catch (err: any) {
-        error('Failed to check for updates', err.message);
+      } catch (err) {
+        const message = err instanceof Error ? err.message : String(err);
+        error('Failed to check for updates', message);
         process.exit(1);
       }
     });

@@ -36,9 +36,10 @@ export function createSearchCommand(): Command {
         } else {
           console.log('\n' + formatSearchResults(response));
         }
-      } catch (err: any) {
+      } catch (err) {
         spinner.fail('Search failed');
-        error(err.message, 'Make sure your workspace is authenticated.');
+        const message = err instanceof Error ? err.message : String(err);
+        error(message, 'Make sure your workspace is authenticated.');
         process.exit(1);
       }
     });

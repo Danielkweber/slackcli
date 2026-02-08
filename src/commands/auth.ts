@@ -39,9 +39,10 @@ export function createAuthCommand(): Command {
         if (config.auth_type === 'standard') {
           info(`Token Type: ${config.token_type}`);
         }
-      } catch (err: any) {
+      } catch (err) {
         spinner.fail('Authentication failed');
-        error(err.message);
+        const msg = err instanceof Error ? err.message : String(err);
+        error(msg);
         process.exit(1);
       }
     });
@@ -71,9 +72,10 @@ export function createAuthCommand(): Command {
         if (config.auth_type === 'browser') {
           info(`Workspace URL: ${config.workspace_url}`);
         }
-      } catch (err: any) {
+      } catch (err) {
         spinner.fail('Authentication failed');
-        error(err.message);
+        const msg = err instanceof Error ? err.message : String(err);
+        error(msg);
         process.exit(1);
       }
     });
@@ -99,8 +101,9 @@ export function createAuthCommand(): Command {
           const isDefault = ws.workspace_id === defaultId;
           console.log(`${idx + 1}. ${formatWorkspace(ws, isDefault)}\n`);
         });
-      } catch (err: any) {
-        error('Failed to list workspaces', err.message);
+      } catch (err) {
+        const msg = err instanceof Error ? err.message : String(err);
+        error('Failed to list workspaces', msg);
         process.exit(1);
       }
     });
@@ -114,8 +117,9 @@ export function createAuthCommand(): Command {
       try {
         await setDefaultWorkspace(workspaceId);
         success(`Set ${workspaceId} as default workspace`);
-      } catch (err: any) {
-        error('Failed to set default workspace', err.message);
+      } catch (err) {
+        const msg = err instanceof Error ? err.message : String(err);
+        error('Failed to set default workspace', msg);
         process.exit(1);
       }
     });
@@ -129,8 +133,9 @@ export function createAuthCommand(): Command {
       try {
         await removeWorkspace(workspaceId);
         success(`Removed workspace ${workspaceId}`);
-      } catch (err: any) {
-        error('Failed to remove workspace', err.message);
+      } catch (err) {
+        const msg = err instanceof Error ? err.message : String(err);
+        error('Failed to remove workspace', msg);
         process.exit(1);
       }
     });
@@ -143,8 +148,9 @@ export function createAuthCommand(): Command {
       try {
         await clearAllWorkspaces();
         success('Logged out from all workspaces');
-      } catch (err: any) {
-        error('Failed to logout', err.message);
+      } catch (err) {
+        const msg = err instanceof Error ? err.message : String(err);
+        error('Failed to logout', msg);
         process.exit(1);
       }
     });
@@ -258,9 +264,10 @@ export function createAuthCommand(): Command {
             spinner.succeed('Authentication successful!');
             success(`Authenticated as workspace: ${config.workspace_name}`);
             info(`Workspace ID: ${config.workspace_id}`);
-          } catch (err: any) {
+          } catch (err) {
             spinner.fail('Authentication failed');
-            error(err.message);
+            const msg = err instanceof Error ? err.message : String(err);
+            error(msg);
             process.exit(1);
           }
         } else {
@@ -272,8 +279,9 @@ export function createAuthCommand(): Command {
           console.log(`    --xoxc="${parsed.xoxc}" \\`);
           console.log(`    --workspace-url="${parsed.workspaceUrl}"\n`);
         }
-      } catch (err: any) {
-        error('Failed to parse cURL command', err.message);
+      } catch (err) {
+        const msg = err instanceof Error ? err.message : String(err);
+        error('Failed to parse cURL command', msg);
         console.log(chalk.yellow('\n💡 Tip: Right-click on a Slack API request in browser DevTools'));
         console.log(chalk.yellow('   → Copy → Copy as cURL, then paste here\n'));
         process.exit(1);

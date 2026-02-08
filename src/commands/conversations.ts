@@ -2,7 +2,7 @@ import { Command } from 'commander';
 import ora from 'ora';
 import { getAuthenticatedClient } from '../lib/auth.ts';
 import { error, formatChannelList, formatChannelListWithUnreads, formatConversationHistory, formatUnreadThreads } from '../lib/formatter.ts';
-import type { SlackChannel, SlackMessage, SlackThreadEntry, SlackUser } from '../types/index.ts';
+import type { SlackChannel, SlackConversationHistoryResponse, SlackMessage, SlackThreadEntry, SlackUser } from '../types/index.ts';
 
 export function createConversationsCommand(): Command {
   const conversations = new Command('conversations')
@@ -50,9 +50,10 @@ export function createConversationsCommand(): Command {
         spinner.succeed(`Found ${channels.length} conversations`);
 
         console.log('\n' + formatChannelList(channels, users));
-      } catch (err: any) {
+      } catch (err) {
         spinner.fail('Failed to fetch conversations');
-        error(err.message, 'Run "slackcli auth list" to check your authentication.');
+        const message = err instanceof Error ? err.message : String(err);
+        error(message, 'Run "slackcli auth list" to check your authentication.');
         process.exit(1);
       }
     });
@@ -75,7 +76,7 @@ export function createConversationsCommand(): Command {
       try {
         const client = await getAuthenticatedClient(options.workspace);
 
-        let response: any;
+        let response: SlackConversationHistoryResponse;
         let messages: SlackMessage[];
 
         if (options.threadTs) {
@@ -150,9 +151,10 @@ export function createConversationsCommand(): Command {
         } else {
           console.log('\n' + formatConversationHistory(channelId, messages, users));
         }
-      } catch (err: any) {
+      } catch (err) {
         spinner.fail('Failed to fetch messages');
-        error(err.message);
+        const message = err instanceof Error ? err.message : String(err);
+        error(message);
         process.exit(1);
       }
     });
@@ -200,7 +202,7 @@ export function createConversationsCommand(): Command {
           unreadEntries.map(async (entry) => {
             try {
               const info = await client.getConversationInfo(entry.id);
-              return info.channel as SlackChannel ?? { id: entry.id } as SlackChannel;
+              return info.channel ?? { id: entry.id } as SlackChannel;
             } catch {
               return { id: entry.id } as SlackChannel;
             }
@@ -244,9 +246,10 @@ export function createConversationsCommand(): Command {
         } else {
           console.log('\n' + formatChannelListWithUnreads(channels, users, mentionCounts));
         }
-      } catch (err: any) {
+      } catch (err) {
         spinner.fail('Failed to fetch conversations');
-        error(err.message, 'Run "slackcli auth list" to check your authentication.');
+        const message = err instanceof Error ? err.message : String(err);
+        error(message, 'Run "slackcli auth list" to check your authentication.');
         process.exit(1);
       }
     });
@@ -339,9 +342,10 @@ export function createConversationsCommand(): Command {
         } else {
           console.log('\n' + formatUnreadThreads(threads, channelNames, users));
         }
-      } catch (err: any) {
+      } catch (err) {
         spinner.fail('Failed to fetch threads');
-        error(err.message, 'Run "slackcli auth list" to check your authentication.');
+        const message = err instanceof Error ? err.message : String(err);
+        error(message, 'Run "slackcli auth list" to check your authentication.');
         process.exit(1);
       }
     });
@@ -375,9 +379,10 @@ export function createConversationsCommand(): Command {
 
         await client.markConversationRead(channelId, ts);
         spinner.succeed(`Marked ${channelId} as read up to ${ts}`);
-      } catch (err: any) {
+      } catch (err) {
         spinner.fail('Failed to mark conversation as read');
-        error(err.message);
+        const message = err instanceof Error ? err.message : String(err);
+        error(message);
         process.exit(1);
       }
     });

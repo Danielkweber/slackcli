@@ -78,8 +78,7 @@ export interface SlackMessage {
   }>;
 }
 
-export interface SlackAuthTestResponse {
-  ok: boolean;
+export interface SlackAuthTestResponse extends SlackApiResponse {
   url: string;
   team: string;
   user: string;
@@ -154,8 +153,7 @@ export interface SlackSearchFileMatch {
   permalink: string;
 }
 
-export interface SlackSearchResponse {
-  ok: boolean;
+export interface SlackSearchResponse extends SlackApiResponse {
   query: string;
   messages: { matches: SlackSearchMessageMatch[]; paging: SlackSearchPaging };
   files: { matches: SlackSearchFileMatch[]; paging: SlackSearchPaging };
@@ -180,8 +178,7 @@ export interface SlackThreadEntry {
   latest_replies?: SlackMessage[];
 }
 
-export interface SlackThreadView {
-  ok: boolean;
+export interface SlackThreadView extends SlackApiResponse {
   total_unread_replies: number;
   new_threads_count: number;
   has_more: boolean;
@@ -189,15 +186,72 @@ export interface SlackThreadView {
   threads: SlackThreadEntry[];
 }
 
-// File upload types
-export interface FileUploadUrlResponse {
+// Base API response — all Slack API responses have `ok`
+export interface SlackApiResponse {
   ok: boolean;
+  error?: string;
+}
+
+// conversations.list
+export interface SlackConversationsListResponse extends SlackApiResponse {
+  channels: SlackChannel[];
+  response_metadata?: { next_cursor?: string };
+}
+
+// conversations.info
+export interface SlackConversationInfoResponse extends SlackApiResponse {
+  channel: SlackChannel;
+}
+
+// conversations.history / conversations.replies
+export interface SlackConversationHistoryResponse extends SlackApiResponse {
+  messages: SlackMessage[];
+  has_more?: boolean;
+  response_metadata?: { next_cursor?: string };
+}
+
+// conversations.mark
+export interface SlackConversationMarkResponse extends SlackApiResponse {}
+
+// conversations.open
+export interface SlackConversationOpenResponse extends SlackApiResponse {
+  channel: { id: string };
+}
+
+// chat.postMessage
+export interface SlackPostMessageResponse extends SlackApiResponse {
+  channel: string;
+  ts: string;
+  message: SlackMessage;
+}
+
+// users.info
+export interface SlackUserInfoResponse extends SlackApiResponse {
+  user: SlackUser;
+}
+
+// users batch (our own aggregate shape)
+export interface SlackUsersInfoResponse extends SlackApiResponse {
+  users: SlackUser[];
+}
+
+// reactions.add / reactions.remove
+export interface SlackReactionResponse extends SlackApiResponse {}
+
+// client.counts (internal Slack API)
+export interface SlackClientCountsResponse extends SlackApiResponse {
+  channels: Array<{ id: string; mention_count: number; has_unreads: boolean }>;
+  mpims: Array<{ id: string; mention_count: number; has_unreads: boolean }>;
+  ims: Array<{ id: string; mention_count: number; has_unreads: boolean }>;
+}
+
+// File upload types
+export interface FileUploadUrlResponse extends SlackApiResponse {
   upload_url: string;
   file_id: string;
 }
 
-export interface FileUploadCompleteResponse {
-  ok: boolean;
+export interface FileUploadCompleteResponse extends SlackApiResponse {
   files: Array<{ id: string; title?: string }>;
 }
 

@@ -32,8 +32,9 @@ export async function authenticateStandard(
     await addWorkspace(config);
 
     return config;
-  } catch (error: any) {
-    throw new Error(`Authentication failed: ${error.message}`);
+  } catch (err) {
+    const message = err instanceof Error ? err.message : String(err);
+    throw new Error(`Authentication failed: ${message}`);
   }
 }
 
@@ -74,8 +75,9 @@ export async function authenticateBrowser(
     await addWorkspace(config);
 
     return config;
-  } catch (error: any) {
-    throw new Error(`Authentication failed: ${error.message}`);
+  } catch (err) {
+    const message = err instanceof Error ? err.message : String(err);
+    throw new Error(`Authentication failed: ${message}`);
   }
 }
 

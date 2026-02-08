@@ -62,10 +62,10 @@ export async function readClipboard(): Promise<ClipboardResult> {
     }
 
     return await tryCommand(command, args);
-  } catch (err: any) {
+  } catch (err) {
     return {
       success: false,
-      error: err.message || 'Unknown clipboard error',
+      error: err instanceof Error ? err.message : 'Unknown clipboard error',
     };
   }
 }
@@ -102,7 +102,7 @@ async function tryCommand(command: string, args: string[]): Promise<ClipboardRes
       stderr += data.toString();
     });
 
-    proc.on('error', (err: any) => {
+    proc.on('error', (err: NodeJS.ErrnoException) => {
       if (!resolved) {
         resolved = true;
         clearTimeout(timeoutId);
