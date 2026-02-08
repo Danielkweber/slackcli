@@ -2,9 +2,8 @@
 
 ## Overview
 
-TypeScript CLI for Slack, built with Bun + Commander.js.
-- **Upstream**: [shaharia-lab/slackcli](https://github.com/shaharia-lab/slackcli)
-- **Fork**: [Danielkweber/slackcli](https://github.com/Danielkweber/slackcli)
+TypeScript CLI for Slack, built with Bun + Commander.js. Strict typing — zero `any` in source.
+- **Repo**: [Danielkweber/slackcli](https://github.com/Danielkweber/slackcli) (standalone, originally forked from shaharia-lab/slackcli)
 - **Branch convention**: `daniel/feat/<name>`, `daniel/fix/<name>`
 
 ## Dev Workflow
@@ -45,6 +44,27 @@ Two auth modes, handled transparently by `SlackClient`:
 - `conversations.list` with `cursor: undefined` serializes as the string `"undefined"` via URLSearchParams in browser auth — always omit the key when cursor is falsy.
 - `client.counts` returns `{ channels, mpims, ims }` arrays with `{ id, has_unreads, mention_count, last_read, latest }` per entry. No channel names — need `conversations.info` to resolve.
 - Workspace name in config is case-sensitive ("Suno" not "suno").
+
+## Typing Conventions
+
+All Slack API responses are typed via interfaces in `src/types/index.ts`:
+- `SlackApiResponse` — base interface (`ok: boolean`, `error?: string`). All response types extend it.
+- Endpoint-specific types: `SlackConversationsListResponse`, `SlackConversationHistoryResponse`, `SlackPostMessageResponse`, etc.
+- `SlackClient` methods return specific types (e.g., `Promise<SlackPostMessageResponse>`), not `Promise<any>`.
+
+**How it works internally:** The generic `request()` method returns `Promise<SlackApiResponse>`. Each public method casts via `as Promise<SpecificType>`. This is the standard pattern for a single-entry-point API client — the cast is safe because we control which API method maps to which response type.
+
+**`Record<string, any>` on `request()`/`standardRequest()`/`browserRequest()`:** Intentionally kept as `any` (with eslint-disable comments) because `@slack/web-api`'s `apiCall` accepts `any` and browser auth's `URLSearchParams` needs flexible values. Public methods use narrower param types (`Record<string, string>` etc.).
+
+**Error handling:** All `catch` blocks use `unknown` (not `any`). Pattern:
+```typescript
+} catch (err) {
+  const message = err instanceof Error ? err.message : String(err);
+  error(message);
+}
+```
+
+**`any` policy:** Zero `any` in source files. Only allowed in test mocks (for `(client as any).request = mock(...)` pattern) and the three internal request methods (documented above).
 
 ## Testing
 
