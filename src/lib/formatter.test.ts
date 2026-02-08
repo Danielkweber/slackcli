@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'bun:test';
-import { formatSearchResults, formatTimestamp } from './formatter';
-import type { SlackSearchResponse } from '../types/index.ts';
+import { formatChannelListWithUnreads, formatSearchResults, formatTimestamp } from './formatter';
+import type { SlackChannel, SlackSearchResponse, SlackUser } from '../types/index.ts';
 
 function makeSearchResponse(overrides: Partial<SlackSearchResponse> = {}): SlackSearchResponse {
   return {
@@ -17,6 +17,57 @@ function makeSearchResponse(overrides: Partial<SlackSearchResponse> = {}): Slack
     ...overrides,
   };
 }
+
+describe('formatChannelListWithUnreads', () => {
+  it('should show "No unread" message when list is empty', () => {
+    const result = formatChannelListWithUnreads([], new Map());
+    expect(result).toContain('No unread conversations');
+  });
+
+  it('should show channel names with mention counts', () => {
+    const channels: SlackChannel[] = [
+      { id: 'C1', name: 'general' },
+      { id: 'C2', name: 'random' },
+    ];
+    const mentions = new Map([['C1', 5], ['C2', 0]]);
+    const result = formatChannelListWithUnreads(channels, new Map(), mentions);
+    expect(result).toContain('#general');
+    expect(result).toContain('5 mentions');
+    expect(result).toContain('#random');
+    expect(result).toContain('unread');
+  });
+
+  it('should show DM user names from users map', () => {
+    const channels: SlackChannel[] = [
+      { id: 'D1', is_im: true, user: 'U1' },
+    ];
+    const users = new Map<string, SlackUser>([
+      ['U1', { id: 'U1', real_name: 'Alice Smith' }],
+    ]);
+    const mentions = new Map([['D1', 3]]);
+    const result = formatChannelListWithUnreads(channels, users, mentions);
+    expect(result).toContain('@Alice Smith');
+    expect(result).toContain('3 mentions');
+  });
+
+  it('should show total count in header', () => {
+    const channels: SlackChannel[] = [
+      { id: 'C1', name: 'general' },
+      { id: 'C2', name: 'random' },
+      { id: 'C3', name: 'dev' },
+    ];
+    const result = formatChannelListWithUnreads(channels, new Map());
+    expect(result).toContain('(3)');
+  });
+
+  it('should show channel IDs', () => {
+    const channels: SlackChannel[] = [
+      { id: 'C1ABCDEF', name: 'general', unread_count_display: 1 },
+    ];
+    const result = formatChannelListWithUnreads(channels, new Map());
+    expect(result).toContain('C1ABCDEF');
+  });
+});
 
 describe('formatSearchResults', () => {
   it('should show the search query', () => {

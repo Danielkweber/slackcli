@@ -19,6 +19,38 @@ function createMockClient() {
   return { client, requestMock };
 }
 
+describe('SlackClient markConversationRead', () => {
+  it('should call conversations.mark with channel and ts', async () => {
+    const { client, requestMock } = createMockClient();
+    requestMock.mockResolvedValueOnce({ ok: true });
+
+    await client.markConversationRead('C123ABC', '1700000000.000100');
+
+    expect(requestMock).toHaveBeenCalledWith('conversations.mark', {
+      channel: 'C123ABC',
+      ts: '1700000000.000100',
+    });
+  });
+
+  it('should return the API response', async () => {
+    const { client, requestMock } = createMockClient();
+    requestMock.mockResolvedValueOnce({ ok: true });
+
+    const result = await client.markConversationRead('C123', '1234.5678');
+
+    expect(result).toEqual({ ok: true });
+  });
+
+  it('should propagate errors', async () => {
+    const { client, requestMock } = createMockClient();
+    requestMock.mockRejectedValueOnce(new Error('channel_not_found'));
+
+    await expect(
+      client.markConversationRead('CBAD', '1234.5678')
+    ).rejects.toThrow('channel_not_found');
+  });
+});
+
 describe('SlackClient upload methods', () => {
   const originalFetch = globalThis.fetch;
 
