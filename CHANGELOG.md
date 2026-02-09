@@ -5,6 +5,21 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.3.0] - 2026-02-09
+
+### Added
+- **Search** (`search`): Search messages and files across the workspace
+- **File Uploads** (`files upload`): Single and multi-file uploads to channels/threads via modern 3-step Slack API
+- **List Unreads** (`conversations list-unreads`): See all unread conversations at a glance
+- **Unread Threads** (`conversations list-unread-threads`): View subscribed threads with new replies
+- **Mark as Read** (`conversations mark-read`): Mark conversations as read
+- **Interactive cURL Parsing** (`auth parse-curl`): Clipboard and interactive input support for easier token extraction
+
+### Changed
+- Strict typing across all Slack API responses — eliminated `any` from source
+- Updater and release workflow now point to Danielkweber/slackcli (severed from upstream)
+- Updated package author and changelog links to standalone repo
+
 ## [0.2.0] - 2026-01-30
 
 ### Added
@@ -112,7 +127,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
-[0.2.0]: https://github.com/shaharia-lab/slackcli/releases/tag/v0.2.0
-[0.1.1]: https://github.com/shaharia-lab/slackcli/releases/tag/v0.1.1
-[0.1.0]: https://github.com/shaharia-lab/slackcli/releases/tag/v0.1.0
+[0.3.0]: https://github.com/Danielkweber/slackcli/releases/tag/v0.3.0
+[0.2.0]: https://github.com/Danielkweber/slackcli/releases/tag/v0.2.0
+[0.1.1]: https://github.com/Danielkweber/slackcli/releases/tag/v0.1.1
+[0.1.0]: https://github.com/Danielkweber/slackcli/releases/tag/v0.1.0
 

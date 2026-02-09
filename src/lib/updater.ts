@@ -3,8 +3,8 @@ import { tmpdir } from 'os';
 import { join } from 'path';
 import { info, success, error as logError } from './formatter.ts';
 
-const GITHUB_REPO = 'shaharia-lab/slackcli';
-const CURRENT_VERSION = '0.1.1';
+const GITHUB_REPO = 'Danielkweber/slackcli';
+const CURRENT_VERSION = '0.3.0';
 
 interface GitHubRelease {
   tag_name: string;

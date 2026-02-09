@@ -1,6 +1,6 @@
 {
   "name": "slackcli",
-  "version": "0.2.0",
+  "version": "0.3.0",
   "description": "A fast, developer-friendly CLI tool for interacting with Slack workspaces",
   "main": "src/index.ts",
   "type": "module",
@@ -22,7 +22,7 @@
     "typescript",
     "bun"
   ],
-  "author": "Shaharia Lab",
+  "author": "Daniel Weber",
   "license": "MIT",
   "dependencies": {
     "@slack/web-api": "^7.11.0",
