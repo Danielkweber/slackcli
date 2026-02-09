@@ -1,17 +1,18 @@
 # SlackCLI
 
-A fast, developer-friendly command-line interface tool for interacting with Slack workspaces. Built with TypeScript and Bun, it enables AI agents, automation tools, and developers to access Slack functionality directly from the terminal.
+A fast, developer-friendly command-line interface for interacting with Slack workspaces. Built with TypeScript and Bun, it enables AI agents, automation tools, and developers to access Slack functionality directly from the terminal.
 
 ## Features
 
-- 🔐 **Dual Authentication Support**: Standard Slack tokens (xoxb/xoxp) or browser tokens (xoxd/xoxc)
-- 🎯 **Easy Token Extraction**: Automatically parse tokens from browser cURL commands
-- 🏢 **Multi-Workspace Management**: Manage multiple Slack workspaces with ease
-- 💬 **Conversation Management**: List channels, read messages, send messages
-- 🎉 **Message Reactions**: Add emoji reactions to messages programmatically
-- 🚀 **Fast & Lightweight**: Built with Bun for blazing fast performance
-- 🔄 **Auto-Update**: Built-in self-update mechanism
-- 🎨 **Beautiful Output**: Colorful, user-friendly terminal output
+- **Dual Authentication** - Standard Slack tokens (xoxb/xoxp) or browser session tokens (xoxd/xoxc)
+- **Easy Token Extraction** - Parse tokens automatically from browser cURL commands
+- **Multi-Workspace** - Manage and switch between multiple Slack workspaces
+- **Conversations** - List channels, read messages, track unreads, mark as read
+- **Unread Threads** - View subscribed threads with unread replies
+- **Search** - Full-text search across messages and files with Slack query syntax
+- **File Uploads** - Upload one or more files to channels or threads
+- **Message Reactions** - Add emoji reactions to messages programmatically
+- **Auto-Update** - Built-in self-update mechanism
 
 ## Installation
 
@@ -19,39 +20,34 @@ A fast, developer-friendly command-line interface tool for interacting with Slac
 
 #### Linux
 ```bash
-curl -L https://github.com/shaharia-lab/slackcli/releases/latest/download/slackcli-linux -o slackcli
+curl -L https://github.com/Danielkweber/slackcli/releases/latest/download/slackcli-linux -o slackcli
 chmod +x slackcli
 mkdir -p ~/.local/bin && mv slackcli ~/.local/bin/
 ```
 
 #### macOS (Intel)
 ```bash
-curl -L https://github.com/shaharia-lab/slackcli/releases/latest/download/slackcli-macos -o slackcli
+curl -L https://github.com/Danielkweber/slackcli/releases/latest/download/slackcli-macos -o slackcli
 chmod +x slackcli
 mkdir -p ~/.local/bin && mv slackcli ~/.local/bin/
 ```
 
 #### macOS (Apple Silicon)
 ```bash
-curl -L https://github.com/shaharia-lab/slackcli/releases/latest/download/slackcli-macos-arm64 -o slackcli
+curl -L https://github.com/Danielkweber/slackcli/releases/latest/download/slackcli-macos-arm64 -o slackcli
 chmod +x slackcli
 mkdir -p ~/.local/bin && mv slackcli ~/.local/bin/
 ```
 
 #### Windows
-Download `slackcli-windows.exe` from the [latest release](https://github.com/shaharia-lab/slackcli/releases/latest) and add it to your PATH.
+Download `slackcli-windows.exe` from the [latest release](https://github.com/Danielkweber/slackcli/releases/latest) and add it to your PATH.
 
 ### From Source
 
 ```bash
-# Clone the repository
-git clone https://github.com/shaharia-lab/slackcli.git
+git clone https://github.com/Danielkweber/slackcli.git
 cd slackcli
-
-# Install dependencies
 bun install
-
-# Build binary
 bun run build
 ```
 
@@ -99,7 +95,7 @@ The easiest way to extract browser tokens is to copy a Slack API request as cURL
 
 ```bash
 # Step 1: In browser DevTools, right-click any Slack API request
-#         → Copy → Copy as cURL
+#         -> Copy -> Copy as cURL
 
 # Step 2: Interactive mode (recommended) - just paste and press Enter twice
 slackcli auth parse-curl --login
@@ -158,6 +154,24 @@ slackcli conversations read C1234567890 --limit=50
 
 # Get JSON output (includes ts and thread_ts for replies)
 slackcli conversations read C1234567890 --json
+
+# List conversations with unread messages
+slackcli conversations list-unreads
+
+# List conversations with unreads (JSON output)
+slackcli conversations list-unreads --json
+
+# List threads with unread replies
+slackcli conversations list-unread-threads
+
+# Show all subscribed threads (not just unread)
+slackcli conversations list-unread-threads --all
+
+# Mark a conversation as read
+slackcli conversations mark-read C1234567890
+
+# Mark read up to a specific message
+slackcli conversations mark-read C1234567890 --timestamp=1234567890.123456
 ```
 
 ### Message Commands
@@ -174,20 +188,43 @@ slackcli messages send --recipient-id=C1234567890 --thread-ts=1234567890.123456 
 
 # Add emoji reaction to a message
 slackcli messages react --channel-id=C1234567890 --timestamp=1234567890.123456 --emoji=+1
-
-# More reaction examples
 slackcli messages react --channel-id=C1234567890 --timestamp=1234567890.123456 --emoji=heart
-slackcli messages react --channel-id=C1234567890 --timestamp=1234567890.123456 --emoji=fire
-slackcli messages react --channel-id=C1234567890 --timestamp=1234567890.123456 --emoji=eyes
 ```
 
-**Common emoji names:**
-- `+1` or `thumbsup` - 👍
-- `heart` - ❤️
-- `fire` - 🔥
-- `eyes` - 👀
-- `tada` - 🎉
-- `rocket` - 🚀
+### Search Commands
+
+```bash
+# Search messages and files
+slackcli search "quarterly report"
+
+# Search with Slack query syntax
+slackcli search "from:@alice in:#general budget"
+
+# Sort by timestamp instead of relevance
+slackcli search "deploy" --sort=timestamp
+
+# Paginate results
+slackcli search "bug" --count=50 --page=2
+
+# JSON output
+slackcli search "meeting notes" --json
+```
+
+### File Commands
+
+```bash
+# Upload a file to a channel
+slackcli files upload --file=./report.pdf --channel-id=C1234567890
+
+# Upload with a title and message
+slackcli files upload --file=./chart.png --channel-id=C1234567890 --title="Q4 Chart" --message="Here's the latest"
+
+# Upload multiple files
+slackcli files upload --file=./doc1.pdf --file=./doc2.pdf --channel-id=C1234567890
+
+# Upload as a thread reply
+slackcli files upload --file=./patch.diff --channel-id=C1234567890 --thread-ts=1234567890.123456
+```
 
 ### Update Commands
 
@@ -238,6 +275,9 @@ bun run build
 # Build for all platforms
 bun run build:all
 
+# Run tests
+bun test
+
 # Type check
 bun run type-check
 ```
@@ -251,14 +291,19 @@ slackcli/
 │   ├── commands/             # Command implementations
 │   │   ├── auth.ts
 │   │   ├── conversations.ts
+│   │   ├── files.ts
 │   │   ├── messages.ts
+│   │   ├── search.ts
 │   │   └── update.ts
 │   ├── lib/                  # Core library
 │   │   ├── auth.ts
-│   │   ├── workspaces.ts
-│   │   ├── slack-client.ts
+│   │   ├── clipboard.ts
+│   │   ├── curl-parser.ts
 │   │   ├── formatter.ts
-│   │   └── updater.ts
+│   │   ├── interactive-input.ts
+│   │   ├── slack-client.ts
+│   │   ├── updater.ts
+│   │   └── workspaces.ts
 │   └── types/                # Type definitions
 │       └── index.ts
 ├── .github/workflows/        # CI/CD
@@ -275,6 +320,38 @@ Contributions are welcome! Please feel free to submit a Pull Request.
 4. Push to the branch (`git push origin feature/amazing-feature`)
 5. Open a Pull Request
 
+## Tips & Gotchas
+
+### Browser Auth vs Standard Auth
+
+Some features use internal Slack APIs that are only available with browser tokens (xoxd/xoxc), not standard bot/user tokens (xoxb/xoxp):
+
+| Feature | Standard tokens | Browser tokens |
+|---------|:-:|:-:|
+| List/read/send messages | Yes | Yes |
+| Search | Yes | Yes |
+| File uploads | Yes | Yes |
+| Reactions | Yes | Yes |
+| List unreads (`list-unreads`) | No | Yes |
+| List unread threads (`list-unread-threads`) | No | Yes |
+| Mark as read (`mark-read`) | No | Yes |
+
+### Browser Token Tips
+
+- **URL-decode xoxd tokens before use.** Browser cookies often URL-encode special characters (`%2B` for `+`, `%2F` for `/`). Pass the decoded value to `auth login-browser` or you'll get `invalid_auth`.
+- **Tokens expire periodically** (days to weeks). Re-authenticate with fresh tokens when you start getting auth errors.
+- The parse-curl method (`auth parse-curl --login`) handles decoding automatically and is the easiest approach.
+
+### Working with Timestamps
+
+- Use `--json` on `conversations read` to get message timestamps — these are required for thread replies (`--thread-ts`) and reactions (`--timestamp`). The human-readable output shows formatted dates but not raw timestamps.
+- Thread reads include the parent message as the first entry in the output.
+
+### Large Workspaces
+
+- `conversations list` returns up to `--limit` conversations (default: 100), sorted by most recent activity. In large workspaces, increase `--limit` or use `--types` to filter.
+- `conversations.list` does **not** return unread counts. Use `conversations list-unreads` instead.
+
 ## Troubleshooting
 
 ### Authentication Issues
@@ -284,8 +361,8 @@ Contributions are welcome! Please feel free to submit a Pull Request.
 - Check token validity in your Slack app settings
 
 **Browser Tokens:**
-- Tokens expire with your browser session
-- Extract fresh tokens if authentication fails
+- Tokens expire with your browser session — extract fresh tokens if authentication fails
+- URL-decode xoxd tokens before passing them (see Tips above)
 - Verify workspace URL format (https://yourteam.slack.com)
 
 ### Permission Errors
@@ -308,17 +385,10 @@ MIT License - see [LICENSE](LICENSE) file for details
 
 ## Support
 
-- 🐛 [Report Issues](https://github.com/shaharia-lab/slackcli/issues)
-- 💬 [Discussions](https://github.com/shaharia-lab/slackcli/discussions)
-- 📧 Email: support@shaharia.com
+- [Report Issues](https://github.com/Danielkweber/slackcli/issues)
 
 ## Acknowledgments
 
 - Built with [Bun](https://bun.sh)
 - Powered by [@slack/web-api](https://slack.dev/node-slack-sdk/)
-- Inspired by [gscli](https://github.com/shaharia-lab/gscli)
-
----
-
-**Made with ❤️ by Shaharia Lab**
-
+- Originally based on [shaharia-lab/slackcli](https://github.com/shaharia-lab/slackcli)
