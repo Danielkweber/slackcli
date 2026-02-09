@@ -84,7 +84,7 @@ Tag-based: push a `v*.*.*` tag to trigger the `Release` workflow (`.github/workf
 - Builds cross-platform binaries (Linux x64, macOS x64, macOS ARM64, Windows x64) via GitHub Actions matrix
 - Creates a GitHub Release with binaries + SHA256 checksums
 - No Homebrew distribution — removed in v0.3.0
-- Remember to bump `CURRENT_VERSION` in `src/lib/updater.ts` AND `version` in `package.json` before tagging
+- Version is single-sourced from `package.json` — both `--version` output and the self-updater read from it. Just bump `package.json` before tagging.
 
 **CI workflows:** `ci.yml` (typecheck + build + smoke test) and `test.yml` (unit + integration tests) run on push/PR to main.
 
