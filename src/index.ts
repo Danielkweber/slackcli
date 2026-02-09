@@ -9,13 +9,14 @@ import { createSearchCommand } from './commands/search.ts';
 import { createUpdateCommand } from './commands/update.ts';
 import { checkForUpdates } from './lib/updater.ts';
 import chalk from 'chalk';
+import packageJson from '../package.json';
 
 const program = new Command();
 
 program
   .name('slackcli')
   .description('A fast, developer-friendly CLI tool for interacting with Slack workspaces')
-  .version('0.1.1');
+  .version(packageJson.version);
 
 // Add commands
 program.addCommand(createAuthCommand());

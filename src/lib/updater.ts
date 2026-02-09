@@ -2,9 +2,10 @@ import { writeFile, chmod, rename, unlink } from 'fs/promises';
 import { tmpdir } from 'os';
 import { join } from 'path';
 import { info, success, error as logError } from './formatter.ts';
+import packageJson from '../../package.json';
 
 const GITHUB_REPO = 'Danielkweber/slackcli';
-const CURRENT_VERSION = '0.3.0';
+const CURRENT_VERSION = packageJson.version;
 
 interface GitHubRelease {
   tag_name: string;
