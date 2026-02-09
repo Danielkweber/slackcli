@@ -78,6 +78,18 @@ function createMockClient() {
 }
 ```
 
+## Release Process
+
+Tag-based: push a `v*.*.*` tag to trigger the `Release` workflow (`.github/workflows/release.yml`).
+- Builds cross-platform binaries (Linux x64, macOS x64, macOS ARM64, Windows x64) via GitHub Actions matrix
+- Creates a GitHub Release with binaries + SHA256 checksums
+- No Homebrew distribution — removed in v0.3.0
+- Remember to bump `CURRENT_VERSION` in `src/lib/updater.ts` AND `version` in `package.json` before tagging
+
+**CI workflows:** `ci.yml` (typecheck + build + smoke test) and `test.yml` (unit + integration tests) run on push/PR to main.
+
+**Third-party actions:** `softprops/action-gh-release@v1` is pinned to major version tag (not SHA). `oven-sh/setup-bun@v1` uses `bun-version: latest` (not pinned). Both are low-risk for a personal project but worth noting.
+
 ## Features Added via Fork
 
 | Feature | PR | API Used |
